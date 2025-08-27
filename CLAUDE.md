@@ -1,4 +1,59 @@
-# Development Guidelines
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a Next.js application configured to deploy on Cloudflare Workers using the OpenNext Cloudflare adapter. The project is a minimal boilerplate that uses:
+
+- Next.js 15.4.6 with React 19
+- TypeScript for type safety
+- Tailwind CSS for styling
+- OpenNext Cloudflare for deployment
+- ESLint and Prettier for code quality
+
+## Key Architecture
+
+- **App Router**: Uses Next.js App Router (`src/app/` directory structure)
+- **Cloudflare Workers**: Configured to deploy as Cloudflare Workers via `@opennextjs/cloudflare`
+- **TypeScript**: Strict TypeScript configuration with path aliases (`@/*` → `./src/*`)
+- **Styling**: Geist Sans and Geist Mono fonts are configured in `src/lib/fonts.ts`
+
+## Development Commands
+
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build the application for production
+- `pnpm lint` - Run ESLint
+- `pnpm format` - Format code with Prettier
+- `pnpm format:check` - Check code formatting without changes
+- `pnpm type-check` - Run TypeScript type checking without emitting files
+- `pnpm validate` - Run all checks (type-check, lint, format:check, build)
+
+## Deployment Commands
+
+- `pnpm deploy` - Build and deploy to Cloudflare Workers
+- `pnpm preview` - Build and preview locally before deployment
+- `pnpm cf-typegen` - Generate TypeScript types for Cloudflare environment
+
+## Configuration Files
+
+- `wrangler.jsonc` - Cloudflare Workers configuration
+- `open-next.config.ts` - OpenNext Cloudflare adapter configuration
+- `next.config.ts` - Next.js configuration with Cloudflare dev support
+- `cloudflare-env.d.ts` - TypeScript definitions for Cloudflare environment
+
+## Project Structure
+
+```
+src/
+├── app/           # Next.js App Router pages
+│   ├── layout.tsx # Root layout with font configuration
+│   └── page.tsx   # Homepage
+├── lib/           # Utility functions and configurations
+│   └── fonts.ts   # Font definitions (Geist Sans/Mono)
+└── styles/        # Global CSS styles
+    └── globals.css
+```
 
 ## Philosophy
 
@@ -20,7 +75,7 @@
 
 ### 1. Planning & Staging
 
-Break complex work into 3-5 stages. Document in `IMPLEMENTATION_PLAN.md`:
+Break complex work into 3-5 stages. Document in `docs/IMPLEMENTATION_PLAN.md`:
 
 ```markdown
 ## Stage N: [Name]
@@ -76,16 +131,28 @@ Break complex work into 3-5 stages. Document in `IMPLEMENTATION_PLAN.md`:
 
 ### Code Quality
 
+- **Language Standards**:
+  - All code comments and text content must be in English by default
+  - Variable names, function names, and documentation should use English
+  - Only use other languages when explicitly requested in the prompt
+  - This ensures consistency and international accessibility
+
+- **After generating code**:
+  - Run `pnpm format` to ensure code formatting compliance
+  - Verify code compiles and follows project conventions
+
 - **Every commit must**:
   - Compile successfully
   - Pass all existing tests
   - Include tests for new functionality
   - Follow project formatting/linting
+  - Use conventional commit message format (enforced by commitlint)
 
 - **Before committing**:
   - Run formatters/linters
   - Self-review changes
-  - Ensure commit message explains "why"
+  - Ensure commit message follows conventional format: `type(scope): description`
+  - Commit message types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 
 ### Error Handling
 
@@ -155,220 +222,33 @@ When multiple valid approaches exist, choose based on:
 - Learn from existing implementations
 - Stop after 3 failed attempts and reassess
 
-## Project-Specific Guidelines
+**OTHER**:
 
-### Directory Structure & Routing Constraints
+- The project uses ES modules (`"type": "module"` in package.json)
+- TypeScript paths are configured for `@/*` imports pointing to `src/*`
+- The application is minimal and serves as a starting point for Cloudflare Workers deployment
 
-**Next.js App Router Structure**:
+## Git Hooks & Quality Assurance
 
-- Use route groups `(auth)` and `(marketing)` for logical organization
-- Authentication pages go in `src/app/(auth)/` (login, sign-up)
-- Marketing/public pages go in `src/app/(marketing)/` (home, blog, about)
-- Dynamic routes use bracket notation: `[slug]`, `[page]`
-- API routes in `src/app/api/` following REST conventions
+The project uses **Husky** for Git hooks to prevent broken code from being committed:
 
-**Component Organization**:
+### Pre-commit Hook (`.husky/pre-commit`)
+Automatically runs on every commit attempt:
+1. **lint-staged**: Formats and lints only staged files
+2. **TypeScript check**: Fast type checking (`tsc --noEmit`)
+3. **Build verification**: Full build to catch module resolution and other errors
 
-- UI primitives in `src/components/ui/` (shadcn components)
-- Shared components in `src/components/shared/` (logo, theme toggle)
-- Feature-specific components in `src/components/[feature]/` (auth, marketing, content, mail)
-- MagicUI components in `src/components/magicui/`
+This catches issues like:
+- Import path errors (e.g., `./globals.css` instead of `../styles/globals.css`)
+- TypeScript compilation errors
+- Module resolution failures
+- Build configuration problems
 
-**Configuration Structure**:
+### Commit Message Hook (`.husky/commit-msg`)
+Enforces conventional commit format using commitlint:
+- `feat: add new feature`
+- `fix: resolve bug`
+- `docs: update documentation`
 
-- All configs in `src/config/` directory
-- Separate files for different domains: `website.ts`, `marketing.ts`
-- Use `defineConfig()` wrapper for type safety and methods
-- Import from `@/config/[module]` in components
-
-**Content Organization**:
-
-- Blog content in `content/blog/[locale]/` using MDX format
-- Static pages in `content/page/[locale]/` using MDX format
-- Follow locale-based directory structure for i18n support
-
-### Configuration System Constraints
-
-**Config Structure Requirements**:
-
-- All configurations must use `defineConfig<T>()` from `@/lib/config`
-- Configurations must implement corresponding TypeScript interfaces from `@/types/config`
-- Environment variables should be accessed within config files, not components
-- Use the config system's built-in methods: `getConfig()`, `isConfigEnabled()`, `hasConfig()`
-
-**Website Configuration**:
-
-```typescript
-// Required structure for website config
-{
-  basicInfo: { title, description, appPrefix, baseUrl },
-  i18n: { enable, defaultLocale, locales },
-  theme: { defaultTheme, enableThemeToggle }
-}
-```
-
-**Marketing Configuration**:
-
-```typescript
-// Required structure for marketing config
-{
-  headerMenus: [{ name, href, external? }],
-  footerMenus: [{ group, items: [{ name, href, external? }] }],
-  socialLinks: [{ name, href, icon }]
-}
-```
-
-### Blog System Constraints
-
-**Technology Stack**:
-
-- Use Fumadocs for content management (`fumadocs-core`, `fumadocs-mdx`)
-- MDX files with frontmatter for all blog content
-- Locale-based directory structure under `content/blog/`
-
-**MDX Frontmatter Requirements**:
-
-```yaml
-title: 'Required - Article title'
-description: 'Required - Article description'
-date: 'Required - YYYY-MM-DD format'
-tags: ['Optional - Array of tags']
-featured: false # Optional - Boolean
-readTime: 'Optional - e.g., "5 min read"'
-author: 'Optional - Author name'
-```
-
-**Blog Implementation Rules**:
-
-- Use `blogSource.getPages(locale)` to fetch locale-specific content
-- Sort by date descending for chronological order
-- Implement tag filtering with counts
-- Support pagination for large content sets
-- Use `BlogCard` component for consistent presentation
-
-### Internationalization (i18n) Constraints
-
-**Locale Configuration**:
-
-- Configure locales in `src/config/website.ts` with code, name, and flag
-- Use `next-intl` for client/server-side translations
-- Default locale configured in website config, not hardcoded
-
-**Translation Files**:
-
-- JSON translation files in `locales/[locale].json`
-- Use nested objects for organization: `{ "auth": { "login": "Login" } }`
-- Access via `useTranslations()` hook or `getTranslations()` server function
-
-**Content Localization**:
-
-- Separate MDX files per locale in `content/blog/[locale]/`
-- Use `getLocale()` from next-intl for server components
-- Configure fumadocs i18n to match website config locales
-
-### UI Component Library Constraints
-
-**Primary Component Sources**:
-
-- **shadcn/ui**: Core UI primitives (buttons, inputs, dialogs)
-- **MagicUI**: Enhanced animations and effects
-- **21st.dev**: Modern component patterns and layouts
-- **Tailark**: Additional UI components and blocks
-
-**Installation Commands**:
-
-```bash
-# For shadcn/ui components
-npx shadcn@latest add [component-name]
-
-# For adding new components to the project
-npx shadcn@latest add button dialog form input
-```
-
-**Component Guidelines**:
-
-- Use Lucide React for icons (`lucide-react`)
-- Follow New York style variant for shadcn components
-- Use Tailwind CSS for styling with CSS variables for theming
-- Import UI components from `@/components/ui/[component]`
-- Import shared components from `@/components/shared/[component]`
-
-**Styling Constraints**:
-
-- Use `cn()` utility for conditional classes (from `@/lib/utils`)
-- Follow established design tokens in `globals.css`
-- Use CSS variables for theme-aware styling
-- Prefer composition over inheritance for component variants
-
-### Authentication & Email Constraints
-
-**Authentication Stack**:
-
-- **Better Auth** as the primary authentication library
-- **Drizzle ORM** for database interactions with PostgreSQL
-- **Resend** for transactional email delivery
-- **Cloudflare Turnstile** for CAPTCHA protection
-
-**Authentication Configuration**:
-
-```typescript
-// Required auth setup in src/lib/auth.ts
-{
-  emailAndPassword: { enabled: true, sendWelcomeEmail },
-  socialProviders: { google: { clientId, clientSecret } },
-  database: drizzleAdapter(db, { provider: 'pg', schema }),
-  plugins: [nextCookies(), oneTap(), captcha()]
-}
-```
-
-**Email Service Setup**:
-
-- Use React Email components for email templates
-- Welcome email component in `src/components/mail/sign-up-success.tsx`
-- Email service configuration in `src/lib/mail.tsx`
-- Environment variables: `RESEND_API_KEY`, `GOOGLE_CLIENT_ID`, etc.
-
-**Authentication Flow Requirements**:
-
-- Cookie prefix must match `websiteConfig.basicInfo.appPrefix`
-- CAPTCHA protection on sign-up and login endpoints
-- Welcome email sent automatically on successful registration
-- Support for Google OAuth with proper client configuration
-
-**Database Schema**:
-
-- Use Drizzle schema definitions in `src/db/schema.ts`
-- Follow Better Auth's required schema structure
-- Run migrations using `pnpm db:migrate` command
-- Use `pnpm db:studio` for database inspection
-
-### Security & Environment Variables
-
-**Required Environment Variables**:
-
-```bash
-# Database
-DATABASE_URL="postgresql://..."
-
-# Authentication
-BETTER_AUTH_SECRET="your-secret-key"
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# Email
-RESEND_API_KEY="your-resend-api-key"
-
-# CAPTCHA
-TURNSTILE_SECRET_KEY="your-cloudflare-turnstile-secret"
-
-# Application
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
-
-**Security Best Practices**:
-
-- Never commit environment variables to version control
-- Use type-safe environment variable validation
-- Implement proper CORS and CSRF protection
-- Use HTTPS in production environments
-- Implement rate limiting for authentication endpoints
+### Manual Quality Checks
+Run `pnpm validate` to execute all quality checks manually before committing.
