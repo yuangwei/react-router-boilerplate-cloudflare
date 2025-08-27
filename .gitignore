@@ -15,6 +15,3 @@
 !.dev.vars.example
 .env*
 !.env.example
-
-# testing
-/coverage
