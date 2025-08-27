@@ -1,0 +1,254 @@
+# Project Rules for Cursor
+
+You are an expert developer working on the ScratchStarter project, a modern full-stack Next.js application with TypeScript, Tailwind CSS, and comprehensive authentication.
+
+## Core Development Philosophy
+
+- **Incremental progress over big bangs** - Make small, compilable changes
+- **Learning from existing code** - Study patterns before implementing
+- **Pragmatic over dogmatic** - Adapt to project reality
+- **Clear intent over clever code** - Choose boring, obvious solutions
+
+## Project Architecture
+
+### Directory Structure Rules
+
+**Next.js App Router Structure:**
+
+- Authentication pages in `src/app/(auth)/` (login, sign-up)
+- Marketing/public pages in `src/app/(marketing)/` (home, blog, about)
+- Dynamic routes use bracket notation: `[slug]`, `[page]`
+- API routes in `src/app/api/` following REST conventions
+
+**Component Organization:**
+
+- UI primitives in `src/components/ui/` (shadcn components only)
+- Shared components in `src/components/shared/` (logo, theme toggle, analytics)
+- Feature-specific components in `src/components/[feature]/` (auth, marketing, content, mail)
+- MagicUI components in `src/components/magicui/`
+
+**Configuration Rules:**
+
+- All configs in `src/config/` directory
+- Use `defineConfig<T>()` wrapper from `@/lib/config`
+- Import from `@/config/[module]` in components
+- Environment variables accessed only within config files
+
+### Technology Stack Constraints
+
+**Authentication & Database:**
+
+- Use Better Auth for authentication (`better-auth`)
+- Use Drizzle ORM with PostgreSQL
+- Use Resend for email delivery
+- Use Cloudflare Turnstile for CAPTCHA
+
+**Content Management:**
+
+- Use Fumadocs for blog/content (`fumadocs-core`, `fumadocs-mdx`)
+- MDX files with frontmatter in `content/blog/[locale]/`
+- Static pages in `content/page/[locale]/`
+
+**Internationalization:**
+
+- Use `next-intl` for translations
+- Configure locales in `src/config/website.ts`
+- Translation files in `locales/[locale].json`
+- Use nested objects: `{ "auth": { "login": "Login" } }`
+
+## Code Quality Standards
+
+### TypeScript Rules
+
+- Always use proper TypeScript types, never `any`
+- Use interfaces from `@/types/config` for configurations
+- Implement proper error handling with descriptive messages
+- Use type-safe environment variable access
+
+### React & Next.js Rules
+
+- Use server components by default, client components only when needed
+- Mark client components with `'use client'` directive
+- Use `async/await` for server-side data fetching
+- Implement proper loading and error states
+
+### Styling Rules
+
+- Use Tailwind CSS exclusively for styling
+- Use `cn()` utility from `@/lib/utils` for conditional classes
+- Follow CSS variables for theme-aware styling
+- Use design tokens from `src/styles/globals.css`
+
+### Component Rules
+
+- Use shadcn/ui components as base primitives
+- Install new components with: `npx shadcn@latest add [component-name]`
+- Use Lucide React for icons (`lucide-react`)
+- Follow composition over inheritance pattern
+
+## Implementation Guidelines
+
+### Configuration System
+
+```typescript
+// Always use defineConfig wrapper
+import defineConfig from '@/lib/config';
+import type { WebsiteConfig } from '@/types/config';
+
+export default defineConfig<WebsiteConfig>({
+  basicInfo: { title, description, appPrefix, baseUrl },
+  i18n: { enable, defaultLocale, locales },
+  theme: { defaultTheme, enableThemeToggle },
+});
+```
+
+### Blog Content Rules
+
+```yaml
+# Required MDX frontmatter
+title: 'Required - Article title'
+description: 'Required - Article description'
+date: 'Required - YYYY-MM-DD format'
+tags: ['Optional - Array of tags']
+featured: false # Optional - Boolean
+readTime: 'Optional - e.g., "5 min read"'
+author: 'Optional - Author name'
+```
+
+### Authentication Implementation
+
+- Cookie prefix must match `websiteConfig.basicInfo.appPrefix`
+- Use `sendWelcomeEmail()` on successful registration
+- Implement CAPTCHA on sign-up and login endpoints
+- Support Google OAuth with proper configuration
+
+### Email Templates
+
+- Use React Email components in `src/components/mail/`
+- Configure Resend in `src/lib/mail.tsx`
+- Welcome email component: `sign-up-success.tsx`
+
+## File Creation Rules
+
+### When creating new files:
+
+**Components:**
+
+- UI components go in `src/components/ui/[component].tsx`
+- Shared components go in `src/components/shared/[component].tsx`
+- Feature components go in `src/components/[feature]/[component].tsx`
+
+**Pages:**
+
+- Use proper Next.js App Router structure
+- Server components for data fetching
+- Client components for interactivity
+
+**API Routes:**
+
+- Follow REST conventions in `src/app/api/`
+- Implement proper error handling
+- Use Better Auth for authentication endpoints
+
+## Import Rules
+
+### Import Patterns:
+
+```typescript
+// Config imports
+import { Logo } from '@/components/shared/logo';
+// Component imports
+import { Button } from '@/components/ui/button';
+import marketingConfig from '@/config/marketing';
+import websiteConfig from '@/config/website';
+// Utility imports
+import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+// Type imports
+import type { WebsiteConfig } from '@/types/config';
+```
+
+## Environment Variables
+
+### Required Environment Variables:
+
+```bash
+# Database
+DATABASE_URL="postgresql://..."
+
+# Authentication
+BETTER_AUTH_SECRET="your-secret-key"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Email
+RESEND_API_KEY="your-resend-api-key"
+
+# CAPTCHA
+TURNSTILE_SECRET_KEY="your-cloudflare-turnstile-secret"
+
+# Application
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+## Testing & Quality
+
+### Before Every Commit:
+
+- [ ] Code compiles successfully
+- [ ] All tests pass
+- [ ] No linter/formatter warnings
+- [ ] Environment variables properly configured
+- [ ] No hardcoded values, use config system
+
+### Code Review Checklist:
+
+- [ ] Uses existing patterns and conventions
+- [ ] Proper TypeScript types
+- [ ] Follows directory structure rules
+- [ ] Uses config system for settings
+- [ ] Implements proper error handling
+
+## Security Rules
+
+- Never commit environment variables
+- Use type-safe environment variable validation
+- Implement proper CORS and CSRF protection
+- Use HTTPS in production
+- Implement rate limiting for auth endpoints
+
+## Common Patterns
+
+### Config Usage:
+
+```typescript
+// Get config values
+const title = websiteConfig.getConfig('basicInfo').title;
+const isI18nEnabled = websiteConfig.isConfigEnabled('i18n');
+```
+
+### Blog Data Fetching:
+
+```typescript
+import { getLocale } from 'next-intl/server';
+
+import { blogSource } from '@/lib/content';
+
+const locale = await getLocale();
+const allPages = blogSource.getPages(locale);
+```
+
+### Authentication:
+
+```typescript
+import { auth } from '@/lib/auth';
+
+// Server component
+const session = await auth.api.getSession({ headers });
+
+// Client component
+import { useSession } from '@/lib/auth.client';
+const { data: session } = useSession();
+```
+
+Remember: Always study existing implementations before creating new features. The codebase has established patterns that should be followed for consistency.
