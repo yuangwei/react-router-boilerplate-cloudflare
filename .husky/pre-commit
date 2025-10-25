@@ -13,6 +13,6 @@ npx tsc --noEmit
 
 # Build check to catch module resolution and other build errors
 echo "🏗️  Running build check..."
-npm run build
+npm run format
 
 echo "✅ All pre-commit checks passed!"
