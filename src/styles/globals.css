@@ -132,4 +132,22 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  /* button hover style default */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='menuitem'],
+  [role='menuitemcheckbox'],
+  [role='menuitemradio'],
+  [role='tab'],
+  [data-slot='sidebar-menu-button'],
+  [data-slot='dropdown-menu-trigger'],
+  [data-slot='avatar'],
+  [data-slot='dropdown-menu-item'],
+  [data-slot='dropdown-menu-label'],
+  [data-slot='dropdown-menu-group'],
+  [data-slot='dropdown-menu-separator'],
+  [data-slot='dropdown-menu-content'],
+  .cursor-pointer {
+    @apply cursor-pointer;
+  }
 }

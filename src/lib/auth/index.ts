@@ -1,18 +1,18 @@
-import { betterAuth, type User } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { stripe } from "@better-auth/stripe";
-import { getDB } from "@/db";
-import { getStripeClient, subscribePlan } from "../stripe";
+import { betterAuth, type User } from "better-auth"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { stripe } from "@better-auth/stripe"
+import { getDB } from "@/db"
+import { getStripeClient, subscribePlan } from "../stripe"
 
-let cachedAuth: ReturnType<typeof betterAuth> | null = null;
+let cachedAuth: ReturnType<typeof betterAuth> | null = null
 
 export function getAuth(env: Cloudflare.Env) {
 	if (cachedAuth) {
-		return cachedAuth;
+		return cachedAuth
 	}
-	const provider = "sqlite"; // or "pg" based on your database
-	const db = getDB(env, provider);
-	console.log("Initializing Better Auth...");
+	const provider = "sqlite" // or "pg" based on your database
+	const db = getDB(env, provider)
+	console.log("Initializing Better Auth...")
 	cachedAuth = betterAuth({
 		secret: env.BETTER_AUTH_SECRET,
 		database: drizzleAdapter(db, {
@@ -39,9 +39,9 @@ export function getAuth(env: Cloudflare.Env) {
 				},
 			}),
 		],
-	});
+	})
 
-	return cachedAuth;
+	return cachedAuth
 }
 /**
  * Get the current authenticated user from the session
@@ -52,23 +52,23 @@ export async function getCurrentUser(
 	headers: Headers,
 ): Promise<User | null> {
 	try {
-		const auth = getAuth(env);
+		const auth = getAuth(env)
 		const session = await auth.api.getSession({
 			headers,
-		});
+		})
 
 		if (!session?.user) {
-			return null;
+			return null
 		}
 		// @ts-ignore
 		return {
 			id: session.user.id,
 			name: session.user.name,
 			email: session.user.email,
-		};
+		}
 	} catch (error) {
-		console.error("Error getting current user:", error);
-		return null;
+		console.error("Error getting current user:", error)
+		return null
 	}
 }
 
@@ -80,13 +80,13 @@ export async function requireAuth(
 	env: Cloudflare.Env,
 	headers: Headers,
 ): Promise<User> {
-	const user = await getCurrentUser(env, headers);
+	const user = await getCurrentUser(env, headers)
 
 	if (!user) {
-		throw new Error("Authentication required");
+		throw new Error("Authentication required")
 	}
 
-	return user;
+	return user
 }
 
 /**
@@ -96,15 +96,15 @@ export async function isAuthenticated(
 	env: Cloudflare.Env,
 	headers: Headers,
 ): Promise<boolean> {
-	const user = await getCurrentUser(env, headers);
-	return user !== null;
+	const user = await getCurrentUser(env, headers)
+	return user !== null
 }
 
 /**
  * Get the auth instance for use in server actions and API routes
  */
 export async function getAuthInstance(env: Cloudflare.Env) {
-	return getAuth(env);
+	return getAuth(env)
 }
 
 /**
@@ -112,12 +112,12 @@ export async function getAuthInstance(env: Cloudflare.Env) {
  */
 export async function getSession(env: Cloudflare.Env, headers: Headers) {
 	try {
-		const auth = getAuth(env);
+		const auth = getAuth(env)
 		return await auth.api.getSession({
 			headers,
-		});
+		})
 	} catch (error) {
-		console.error("Error getting session:", error);
-		return null;
+		console.error("Error getting session:", error)
+		return null
 	}
 }
