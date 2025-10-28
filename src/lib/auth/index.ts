@@ -1,10 +1,8 @@
 import { betterAuth, type User } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { nextCookies } from "better-auth/next-js";
 import { stripe } from "@better-auth/stripe";
-
 import { getDB } from "@/db";
-import { getStripeClient, subscribePlan } from "./stripe";
+import { getStripeClient, subscribePlan } from "../stripe";
 
 let cachedAuth: ReturnType<typeof betterAuth> | null = null;
 
@@ -12,13 +10,13 @@ export function getAuth(env: Cloudflare.Env) {
 	if (cachedAuth) {
 		return cachedAuth;
 	}
-
-	const db = getDB(env);
+	const provider = "sqlite"; // or "pg" based on your database
+	const db = getDB(env, provider);
 	console.log("Initializing Better Auth...");
 	cachedAuth = betterAuth({
 		secret: env.BETTER_AUTH_SECRET,
 		database: drizzleAdapter(db, {
-			provider: "sqlite",
+			provider,
 		}),
 		emailAndPassword: {
 			enabled: true,
@@ -31,7 +29,6 @@ export function getAuth(env: Cloudflare.Env) {
 			},
 		},
 		plugins: [
-			nextCookies(),
 			stripe({
 				stripeClient: getStripeClient(env),
 				stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET!,
@@ -124,8 +121,3 @@ export async function getSession(env: Cloudflare.Env, headers: Headers) {
 		return null;
 	}
 }
-
-export const auth = getAuth({
-	DATABASE_URL: "https://memory:",
-	DATABASE_AUTH_TOKEN: "",
-} as Cloudflare.Env);

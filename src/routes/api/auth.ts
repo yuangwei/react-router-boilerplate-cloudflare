@@ -1,9 +1,12 @@
-import { auth } from "@/lib/auth"; // Adjust the path as necessary
 import type { Route } from "../../+types/root";
+import { getAuth } from "@/lib/auth";
 
-export async function loader(request: Route.LoaderArgs) {
+export async function loader({ context, request }: Route.LoaderArgs) {
+  const auth = getAuth(context.cloudflare.env);
   return auth.handler(request);
 }
-export async function action(request: Route.LoaderArgs) {
+export async function action({ context, request }: Route.LoaderArgs) {
+    const auth = getAuth(context.cloudflare.env);
+
   return auth.handler(request);
 }

@@ -1,4 +1,7 @@
+import { getAuth } from "@/lib/auth";
 import type { Route } from "./+types/home";
+import { useEffect } from "react";
+import { authClient } from "@/lib/auth/client";
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -7,10 +10,20 @@ export function meta({}: Route.MetaArgs) {
 	];
 }
 
-export function loader({ context }: Route.LoaderArgs) {
-	return { message: context.cloudflare.env.VALUE_FROM_CLOUDFLARE };
+export async function loader({ context, request }: Route.LoaderArgs) {
+	const auth = getAuth(context.cloudflare.env);
+	const session = await auth.api.getSession({ headers: request.headers });
+	return { session };
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-	return loaderData.message;
+	useEffect(() => {
+		if (!loaderData.session?.user) {
+			console.log("No user session, initiating social sign-in...");
+			authClient.signIn.social({
+				provider: "google",
+			});
+		}
+	}, [loaderData]);
+	return loaderData.session?.user.email;
 }

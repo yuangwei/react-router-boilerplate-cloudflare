@@ -1,11 +1,10 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { getPostgres } from "./driver/pg";
+import { getSqlite } from "./driver/sqlite";
+export * from "./schema";
 
-export const getDB = (env: Cloudflare.Env) => {
-	const client = createClient({
-		url: env.DATABASE_URL!,
-		authToken: env.DATABASE_AUTH_TOKEN!,
-	});
-	const db = drizzle(client);
-	return db;
+export const getDB = (env: Cloudflare.Env,client: "pg" | "sqlite"): any => {
+	if (client === "pg") {
+		return getPostgres(env);
+	}
+	return getSqlite(env);
 };
