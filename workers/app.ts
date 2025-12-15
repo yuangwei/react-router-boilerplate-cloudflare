@@ -1,4 +1,8 @@
+import { Hono } from "hono"
+import { logger } from "hono/logger";
+import { requestId } from 'hono/request-id';
 import { createRequestHandler } from "react-router"
+import api from '@/api/index.js'
 
 declare module "react-router" {
 	export interface AppLoadContext {
@@ -10,15 +14,24 @@ declare module "react-router" {
 }
 
 const requestHandler = createRequestHandler(
-	// @ts-ignore
 	() => import("virtual:react-router/server-build"),
 	import.meta.env.MODE,
 )
 
+const app = new Hono<{
+  Bindings: Env,
+}>()
+	.use(requestId())
+  .use(logger())
+	.route("/api", api)
+  .all("*", async (c) => {
+    return requestHandler(c.req.raw, {
+      cloudflare: { env: c.env, ctx: c.executionCtx },
+    })
+  });
+
+const fetch = app.fetch
+
 export default {
-	async fetch(request, env, ctx) {
-		return requestHandler(request, {
-			cloudflare: { env, ctx },
-		})
-	},
+	fetch,
 } satisfies ExportedHandler<Env>

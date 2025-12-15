@@ -1,10 +1,9 @@
-import { getPostgres } from "./driver/pg";
-import { getSqlite } from "./driver/sqlite";
-export * from "./schema";
+import { drizzle } from "drizzle-orm/d1";
+import { cache } from "react";
+import * as schema from "./schema";
 
-export const getDB = (env: Cloudflare.Env, client: "pg" | "sqlite"): any => {
-	if (client === "pg") {
-		return getPostgres(env);
-	}
-	return getSqlite(env);
-};
+// main db
+export const getDB = cache((env: Env) => {
+	const db = drizzle(env.DATABASE, { schema });
+	return db;
+});

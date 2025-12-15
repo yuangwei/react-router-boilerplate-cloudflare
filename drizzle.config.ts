@@ -1,14 +1,11 @@
-import config from "dotenv"
-import { defineConfig } from "drizzle-kit"
+import type { Config } from 'drizzle-kit'
 
-config.config({ path: ".dev.vars" })
-
-export default defineConfig({
-	out: "./migrations",
-	schema: "./src/db/schema/index.ts",
-	dialect: "turso", // or "postgresql" | "mysql" | "sqlite", see: https://orm.drizzle.team/docs/drizzle-config-file
-	dbCredentials: {
-		url: process.env.DATABASE_URL!,
-		authToken: process.env.DATABASE_AUTH_TOKEN!,
-	},
-})
+// Only run on db studio
+export default {
+  out: './src/db/migrations',
+  schema: './src/db/schema/index.ts',
+  dialect: 'sqlite',
+  dbCredentials: {
+    url: "file:./.wrangler/state/v3/d1/miniflare-D1DatabaseObject/f293fc6d7ca96e8b392c1dbe8e62e7c7c111e9bac1baf9cf2c9933b8ba73ca6e.sqlite",
+  },
+} satisfies Config

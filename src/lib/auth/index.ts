@@ -2,7 +2,8 @@ import { betterAuth, type User } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { stripe } from "@better-auth/stripe"
 import { getDB } from "@/db"
-import { getStripeClient, subscribePlan } from "../stripe"
+import { getStripeClient } from "@/lib/stripe"
+import pricingConfig from "@/config/pricing"
 
 let cachedAuth: ReturnType<typeof betterAuth> | null = null
 
@@ -10,13 +11,12 @@ export function getAuth(env: Cloudflare.Env) {
 	if (cachedAuth) {
 		return cachedAuth
 	}
-	const provider = "sqlite" // or "pg" based on your database
-	const db = getDB(env, provider)
+	const db = getDB(env)
 	console.log("Initializing Better Auth...")
 	cachedAuth = betterAuth({
 		secret: env.BETTER_AUTH_SECRET,
 		database: drizzleAdapter(db, {
-			provider,
+			provider: 'sqlite',
 		}),
 		emailAndPassword: {
 			enabled: true,
@@ -35,7 +35,7 @@ export function getAuth(env: Cloudflare.Env) {
 				createCustomerOnSignUp: true,
 				subscription: {
 					enabled: true,
-					plans: subscribePlan,
+					plans: pricingConfig.subscribePlan,
 				},
 			}),
 		],
