@@ -10,5 +10,8 @@
 	"main": "./workers/app.ts",
 	"observability": {
 		"enabled": true
+	},
+	"vars": {
+		"CLOUDFLARE_R2_URL": ""
 	}
 }

@@ -3,6 +3,7 @@ import { logger } from "hono/logger";
 import { requestId } from 'hono/request-id';
 import { createRequestHandler } from "react-router"
 import api from '@/api/index.js'
+import queue from "./queue";
 
 declare module "react-router" {
 	export interface AppLoadContext {
@@ -34,4 +35,5 @@ const fetch = app.fetch
 
 export default {
 	fetch,
+	queue,
 } satisfies ExportedHandler<Env>
