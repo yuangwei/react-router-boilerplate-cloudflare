@@ -1,8 +1,5 @@
 import { defineJobs } from "@/lib/queue";
 
-
-const jobs = defineJobs<Env>({
- 
-})
+const jobs = defineJobs<Env>({});
 
 export default jobs;
