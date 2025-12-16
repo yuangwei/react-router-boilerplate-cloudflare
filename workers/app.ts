@@ -4,6 +4,7 @@ import { requestId } from 'hono/request-id';
 import { createRequestHandler } from "react-router"
 import api from '@/api/index.js'
 import queue from "./queue";
+import scheduled from "./scheduled";
 
 declare module "react-router" {
 	export interface AppLoadContext {
@@ -36,4 +37,5 @@ const fetch = app.fetch
 export default {
 	fetch,
 	queue,
+	scheduled
 } satisfies ExportedHandler<Env>
