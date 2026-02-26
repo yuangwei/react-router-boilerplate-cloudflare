@@ -4,6 +4,6 @@ import * as schema from "./schema";
 
 // main db
 export const getDB = cache((env: Env) => {
-	const db = drizzle(env.DATABASE, { schema });
+	const db = drizzle(env.DB, { schema });
 	return db;
 });

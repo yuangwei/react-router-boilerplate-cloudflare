@@ -15,4 +15,8 @@ npx tsc --noEmit
 echo "🏗️  Running build check..."
 npm run format
 
+# Auto-stage any files modified by lint-staged or format
+echo "📦 Auto-staging modified files..."
+git add -A
+
 echo "✅ All pre-commit checks passed!"

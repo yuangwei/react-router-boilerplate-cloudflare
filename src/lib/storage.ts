@@ -9,12 +9,13 @@ export async function uploadToR2(
 	env: Env,
 	file: File,
 	folder: string = "uploads",
+	name?: string,
 ): Promise<UploadResult> {
 	try {
 		const timestamp = Date.now();
 		const randomId = Math.random().toString(36).substring(2, 15);
 		const extension = file.name.split(".").pop() || "bin";
-		const key = `${folder}/${timestamp}_${randomId}.${extension}`;
+		const key = `${folder}/${name || `${timestamp}-${randomId}.${extension}`}`;
 
 		const arrayBuffer = await file.arrayBuffer();
 		const result = await env.R2_BUCKET.put(key, arrayBuffer, {

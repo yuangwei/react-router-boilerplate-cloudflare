@@ -1,6 +1,6 @@
 # React Router Cloudflare Worker Boilerplate
 
-A minimal Next.js application configured to deploy on Cloudflare Workers using the OpenNext Cloudflare adapter.
+A minimal React-Router V7 application configured to deploy on Cloudflare Workers using the OpenNext Cloudflare adapter.
 
 ## 🤖 AI-Friendly
 

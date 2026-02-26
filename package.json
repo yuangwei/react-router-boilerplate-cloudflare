@@ -1,5 +1,5 @@
 {
-  "name": "react-router-cloudflare-boilerplate",
+  "name": "react-router-boilerplate-cloudflare-worker",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,8 +13,8 @@
     "format": "biome format --write ./src/**/*.{ts,tsx}",
     "prepare": "husky install",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply --remote DATABASE",
-    "db:migrate-local": "wrangler d1 migrations apply --local DATABASE",
+    "db:migrate": "wrangler d1 migrations apply --remote DB",
+    "db:migrate-local": "wrangler d1 migrations apply --local DB",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "auth:generate": "NODE_ENV=development npx @better-auth/cli generate --config=./src/lib/auth/cli.ts --output=./src/db/schema/auth.ts",
@@ -31,7 +31,6 @@
     "hono": "^4.11.1",
     "isbot": "^5.1.27",
     "lucide-react": "^0.548.0",
-    "pg": "^8.16.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router": "^7.7.1",
@@ -48,7 +47,6 @@
     "@tailwindcss/vite": "^4.1.4",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^20",
-    "@types/pg": "^8.15.6",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "dotenv": "^17.2.3",

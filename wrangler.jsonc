@@ -3,15 +3,35 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "react-router-cloudflare-boilerplate",
-	"compatibility_date": "2025-04-04",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-	"main": "./workers/app.ts",
-	"observability": {
-		"enabled": true
-	},
-	"vars": {
-		"CLOUDFLARE_R2_URL": ""
-	}
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "react-router-boilerplate-cloudflare-worker",
+  "compatibility_date": "2025-04-04",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "main": "./workers/app.ts",
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "CLOUDFLARE_R2_URL": "https://cdn.example.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "",
+      "database_id": "",
+      "migrations_dir": "src/db/migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": ""
+    }
+  ],
+  "r2_buckets": [
+    {
+      "bucket_name": "",
+      "binding": "R2_BUCKET"
+    }
+  ]
 }
